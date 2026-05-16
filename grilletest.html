@@ -287,8 +287,43 @@
       let activeWordId = null;
 
       grid.querySelectorAll('.letter-input').forEach((input) => {
+        input.addEventListener('keydown', (event) => {
+          if (event.key === ' ') {
+            event.preventDefault();
+            return;
+          }
+
+          if (event.key !== 'Backspace' || !activeWordId) {
+            return;
+          }
+
+          const activeWordCells = wordCellMap.get(activeWordId) || [];
+          const currentCell = input.closest('.grid-cell');
+          const currentCellKey = currentCell?.dataset.cellKey;
+          const currentIndex = activeWordCells.indexOf(currentCellKey);
+
+          if (input.value) {
+            input.value = '';
+            event.preventDefault();
+            return;
+          }
+
+          const previousCellKey = activeWordCells[currentIndex - 1];
+
+          if (previousCellKey) {
+            const previousInput = grid.querySelector(`[data-cell-key="${previousCellKey}"] .letter-input`);
+
+            if (previousInput) {
+              previousInput.focus();
+              previousInput.value = '';
+            }
+
+            event.preventDefault();
+          }
+        });
+
         input.addEventListener('input', () => {
-          input.value = input.value.slice(0, 1).toUpperCase();
+          input.value = input.value.replace(/\s/g, '').slice(0, 1).toUpperCase();
 
           if (!activeWordId || !input.value) {
             return;
@@ -332,6 +367,10 @@
         definitionButton.addEventListener('click', () => {
           const selectedWordId = definitionButton.dataset.wordId;
           activeWordId = selectedWordId;
+
+          grid.querySelectorAll('.definition-item').forEach((item) => {
+            item.classList.toggle('definition-selected', item.dataset.wordId === selectedWordId);
+          });
 
           grid.querySelectorAll('.letter-input').forEach((input) => {
             input.disabled = true;
