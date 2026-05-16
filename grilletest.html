@@ -50,6 +50,11 @@
 
       <footer class="site-footer">
         <span>© 2026 Flèche-moi ça</span>
+
+        <button type="button" class="xp-button finish-button" id="finish-button">
+          Terminer
+        </button>
+
         <a href="/mentions-legales.html">Mentions légales</a>
       </footer>
 
@@ -413,6 +418,7 @@
       }
       const startPanel = document.getElementById('game-start-panel');
       const playButton = document.getElementById('play-button');
+      const finishButton = document.getElementById('finish-button');
       const grid = document.getElementById('crossword-grid');
       const timer = document.getElementById('game-timer');
 
@@ -424,6 +430,70 @@
         grid.classList.remove('game-blurred');
         timer.classList.remove('game-not-started');
         startTimer();
+      });
+
+      finishButton.addEventListener('click', () => {
+        grid.querySelectorAll('.letter-cell .letter-input').forEach((input) => {
+          if (!input.value) {
+            input.value = 'X';
+          }
+
+          input.disabled = true;
+          input.blur();
+        });
+
+        grid.querySelectorAll('.grid-cell').forEach((gridCell) => {
+          gridCell.classList.remove('word-highlighted');
+        });
+
+        grid.querySelectorAll('.definition-item').forEach((item) => {
+          item.classList.remove('definition-selected');
+        });
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        grid.classList.add('game-blurred');
+        timer.classList.add('game-not-started');
+        finishButton.disabled = true;
+
+        const finalTime = timer.textContent;
+
+        startPanel.classList.remove('game-start-hidden');
+        startPanel.innerHTML = `
+          <h2>Félicitations ! ✨</h2>
+          <p>La grille a été résolue en <strong>${finalTime}</strong>.</p>
+          <p id="newsletter-text">Inscris ton adresse mail pour être prévenu.</p>
+          <form class="newsletter-form" id="newsletter-form">
+            <input
+              type="email"
+              class="newsletter-input"
+              id="newsletter-email"
+              placeholder="votre@email.fr"
+              autocomplete="email"
+              required
+            >
+            <button type="submit" class="xp-button">S'inscrire</button>
+          </form>
+        `;
+
+        const newsletterForm = document.getElementById('newsletter-form');
+
+        newsletterForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const emailInput = document.getElementById('newsletter-email');
+          const newsletterText = document.getElementById('newsletter-text');
+
+          if (newsletterText) {
+            newsletterText.remove();
+          }
+          newsletterForm.innerHTML = `
+            <p>Merci et à bientôt !</p>
+            <p><strong>${emailInput.value}</strong></p>
+          `;
+        });
       });
     }
 
