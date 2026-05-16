@@ -1,27 +1,180 @@
+
 html,
 body {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
 }
 
 body {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  font-family: Tahoma, Verdana, Arial, sans-serif;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.35), transparent 28%),
+    linear-gradient(135deg, #2c8fd6 0%, #1f6fb8 45%, #48b650 100%);
+  color: #111;
 }
 
-main {
+.xp-desktop {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 42px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xp-window {
+  width: min(920px, 100%);
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 3px solid #1b4f9c;
+  border-radius: 9px 9px 5px 5px;
+  background: #ece9d8;
+  box-shadow:
+    0 22px 45px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px #ffffff;
+}
+
+.xp-titlebar {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 0 12px;
+  color: #fff;
+  background: linear-gradient(to bottom, #2f82ff 0%, #0754d6 55%, #003c9e 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.55);
+}
+
+.xp-title {
+  font-size: 0.98rem;
+}
+
+.xp-window-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.xp-window-buttons button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  color: #fff;
+  font-family: Tahoma, Verdana, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: bold;
+  line-height: 20px;
+  background: linear-gradient(to bottom, #79b6ff, #1d63d8 55%, #0642aa);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.55);
+  cursor: default;
+}
+
+.xp-window-buttons button:last-child {
+  background: linear-gradient(to bottom, #ff9a7a, #e5411e 55%, #a91505);
+}
+
+.xp-menu-bar {
+  display: flex;
+  gap: 22px;
+  padding: 7px 12px;
+  background: #ece9d8;
+  border-bottom: 1px solid #c9c5b4;
+  color: #222;
+  font-size: 0.92rem;
+}
+
+.xp-menu-bar span::first-letter {
+  text-decoration: underline;
+}
+
+.xp-header {
+  padding: 48px 24px 24px;
+  text-align: center;
+}
+
+.xp-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 6vw, 4rem);
+  color: #123d8f;
+  letter-spacing: -0.04em;
+  text-shadow: 2px 2px 0 #fff;
+}
+
+.xp-header p {
+  margin: 14px 0 0;
+  font-size: 1.08rem;
+  color: #333;
+}
+
+.container {
   flex: 1;
+  width: min(720px, calc(100% - 32px));
+  margin: 18px auto 32px;
+}
+
+.card {
+  padding: 28px;
+  text-align: center;
+  background: #fffef5;
+  border: 2px solid #7f9db9;
+  box-shadow:
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #aca899,
+    4px 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  color: #0b4fb3;
+  font-size: 1.55rem;
+}
+
+.card p {
+  max-width: 560px;
+  margin: 0 auto;
+  color: #222;
+  font-size: 1.03rem;
+  line-height: 1.55;
+}
+
+.xp-button {
+  margin-top: 24px;
+  padding: 8px 28px;
+  min-width: 130px;
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  color: #111;
+  font-family: Tahoma, Verdana, Arial, sans-serif;
+  font-size: 1rem;
+  background: linear-gradient(to bottom, #ffffff 0%, #f4f1e6 45%, #d8d2bd 100%);
+  box-shadow:
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #8b8878;
+  cursor: pointer;
+}
+
+.xp-button:hover {
+  background: linear-gradient(to bottom, #fff7d7 0%, #f1dc8b 50%, #d6b84e 100%);
+}
+
+.xp-button:active {
+  box-shadow: inset 2px 2px 2px rgba(0, 0, 0, 0.25);
+  transform: translate(1px, 1px);
 }
 
 .site-footer {
   margin-top: auto;
-  padding: 30px 20px;
+  padding: 14px 20px 18px;
   text-align: center;
-  background: #000;
-  font-family: Arial, sans-serif;
-  font-size: 0.95rem;
-  color: #666;
+  border-top: 1px solid #c9c5b4;
+  color: #555;
+  font-size: 0.9rem;
 }
 
 .site-footer p {
@@ -32,6 +185,30 @@ main {
 .site-footer a:visited,
 .site-footer a:hover,
 .site-footer a:active {
-  color: #666;
+  color: inherit;
   text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #0b4fb3;
+}
+
+@media (max-width: 640px) {
+  .xp-desktop {
+    padding: 18px 10px;
+    align-items: flex-start;
+  }
+
+  .xp-window {
+    min-height: calc(100vh - 36px);
+  }
+
+  .xp-menu-bar {
+    gap: 12px;
+    overflow-x: auto;
+  }
+
+  .card {
+    padding: 22px 16px;
+  }
 }
