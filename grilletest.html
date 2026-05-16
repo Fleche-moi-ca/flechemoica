@@ -122,15 +122,20 @@
 
     function buildGrid(data) {
       const cells = new Map();
+      const wordCellMap = new Map();
       let maxRow = 0;
       let maxColumn = 0;
+      let definitionCount = 0;
 
-      data.placedWords.forEach((placedWord) => {
+      data.placedWords.forEach((placedWord, wordIndex) => {
         const { definitionCell, direction, word, definitions } = placedWord;
         const parsedWord = parseWord(word);
         const startColumn = definitionCell.column + direction.startColumnDelta;
         const startRow = definitionCell.row + direction.startRowDelta;
         const definitionKey = `${definitionCell.column},${definitionCell.row}`;
+        const wordId = `word-${wordIndex}`;
+        definitionCount += 1;
+        const wordCells = [];
 
         if (!cells.has(definitionKey)) {
           cells.set(definitionKey, {
@@ -146,6 +151,7 @@
         definitionCellData.clues.push({
           text: definitionText,
           arrow,
+          wordId,
           startRowDelta: direction.startRowDelta,
           startColumnDelta: direction.startColumnDelta,
           rowDelta: direction.rowDelta,
@@ -161,20 +167,35 @@
           const key = `${column},${row}`;
           const separatorAfter = parsedWord.separators.includes(index);
 
-          cells.set(key, {
-            type: 'letter',
-            letter,
-            separatorAfter,
-            direction
-          });
+          wordCells.push(key);
+
+          const existingCell = cells.get(key);
+
+          if (existingCell && existingCell.type === 'letter') {
+            existingCell.wordIds.push(wordId);
+            existingCell.separatorAfter = existingCell.separatorAfter || separatorAfter;
+          } else {
+            cells.set(key, {
+              type: 'letter',
+              letter,
+              separatorAfter,
+              direction,
+              wordIds: [wordId]
+            });
+          }
 
           maxColumn = Math.max(maxColumn, column);
           maxRow = Math.max(maxRow, row);
         });
+
+        const lastClue = definitionCellData.clues[definitionCellData.clues.length - 1];
+        lastClue.wordCells = wordCells;
+        wordCellMap.set(wordId, wordCells);
       });
 
       const grid = document.getElementById('crossword-grid');
       grid.innerHTML = '';
+      grid.dataset.definitionCount = definitionCount;
 
       const columnCount = maxColumn + 1;
       const rowCount = maxRow + 1;
@@ -190,6 +211,20 @@
 
           if (!cellData) {
             cell.classList.add('empty-cell');
+            cell.innerHTML = `
+              <input
+                class="letter-input"
+                type="text"
+                inputmode="text"
+                maxlength="1"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Lettre"
+                disabled
+              >
+            `;
           } else if (cellData.type === 'definition') {
             cell.classList.add('definition-cell');
 
@@ -209,10 +244,10 @@
             });
 
             cell.innerHTML = orderedClues.map((clue) => `
-              <div class="definition-item definition-${clue.arrow}">
-                <div class="definition-text">${clue.text}</div>
-                <div class="definition-arrow arrow-${clue.arrow}"></div>
-              </div>
+              <button type="button" class="definition-item definition-${clue.arrow}" data-word-id="${clue.wordId}">
+                <span class="definition-text">${clue.text}</span>
+                <span class="definition-arrow arrow-${clue.arrow}"></span>
+              </button>
             `).join('');
           } else {
             cell.classList.add('letter-cell');
@@ -227,12 +262,101 @@
               }
             }
 
-            cell.textContent = cellData.letter;
+            cell.dataset.wordIds = cellData.wordIds.join(' ');
+            cell.dataset.cellKey = key;
+            cell.innerHTML = `
+              <input
+                class="letter-input"
+                type="text"
+                inputmode="text"
+                maxlength="1"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Lettre"
+                disabled
+              >
+            `;
           }
 
           grid.appendChild(cell);
         }
       }
+
+      let activeWordId = null;
+
+      grid.querySelectorAll('.letter-input').forEach((input) => {
+        input.addEventListener('input', () => {
+          input.value = input.value.slice(0, 1).toUpperCase();
+
+          if (!activeWordId || !input.value) {
+            return;
+          }
+
+          const activeWordCells = wordCellMap.get(activeWordId) || [];
+          const currentCell = input.closest('.grid-cell');
+          const currentCellKey = currentCell?.dataset.cellKey;
+          const currentIndex = activeWordCells.indexOf(currentCellKey);
+          const nextCellKey = activeWordCells[currentIndex + 1];
+
+          if (nextCellKey) {
+            const nextInput = grid.querySelector(`[data-cell-key="${nextCellKey}"] .letter-input`);
+
+            if (nextInput) {
+              nextInput.focus();
+              nextInput.select();
+            }
+
+            return;
+          }
+
+          grid.querySelectorAll('.letter-input').forEach((letterInput) => {
+            letterInput.disabled = true;
+            letterInput.blur();
+          });
+
+          grid.querySelectorAll('.grid-cell').forEach((gridCell) => {
+            gridCell.classList.remove('word-highlighted');
+          });
+
+          grid.querySelectorAll('.definition-item').forEach((item) => {
+            item.classList.remove('definition-selected');
+          });
+
+          activeWordId = null;
+        });
+      });
+
+      grid.querySelectorAll('.definition-item').forEach((definitionButton) => {
+        definitionButton.addEventListener('click', () => {
+          const selectedWordId = definitionButton.dataset.wordId;
+          activeWordId = selectedWordId;
+
+          grid.querySelectorAll('.letter-input').forEach((input) => {
+            input.disabled = true;
+          });
+
+          grid.querySelectorAll('.grid-cell').forEach((gridCell) => {
+            const wordIds = (gridCell.dataset.wordIds || '').split(' ');
+            const isSelectedWordCell = wordIds.includes(selectedWordId);
+            gridCell.classList.toggle('word-highlighted', isSelectedWordCell);
+
+            const input = gridCell.querySelector('.letter-input');
+
+            if (input && isSelectedWordCell) {
+              input.disabled = false;
+            }
+          });
+
+          const firstInput = grid.querySelector('.word-highlighted .letter-input');
+
+          if (firstInput) {
+            firstInput.focus();
+            firstInput.select();
+          }
+        });
+      });
     }
 
     async function initGrid() {

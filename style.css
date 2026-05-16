@@ -329,6 +329,26 @@ body {
   position: relative;
 }
 
+.letter-input {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.word-highlighted,
+.word-highlighted .letter-input {
+  background: #dedede !important;
+}
+
 .separator-right {
   position: relative;
   z-index: 100;
@@ -400,6 +420,7 @@ body {
   position: relative;
   flex: 1;
   min-height: 0;
+  width: 100%;
   padding: 3px 4px;
   box-sizing: border-box;
   overflow: visible;
@@ -407,10 +428,36 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
 }
 
 .definition-item + .definition-item {
   border-top: 2px solid #111;
+}
+
+.definition-number {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  z-index: 3;
+  color: #111;
+  font-size: 0.72em;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.definition-selected {
+  background: #0b4fb3;
+  color: #fff;
+}
+
+.definition-selected .definition-number,
+.definition-selected .definition-text {
+  color: #fff;
 }
 
 .definition-text {
@@ -688,26 +735,14 @@ body {
     padding: 8px 12px;
   }
 
-  .definition-cell {
-    font-size: clamp(0.24rem, 1.35vw, 0.52rem);
-  }
-
   .definition-item {
     padding: 2px;
   }
 
-  .crossword-wrap,
-  .crossword-wrapper {
-    width: min(calc(100svh - 170px), calc(100vw - 20px));
-    height: min(calc(100svh - 170px), calc(100vw - 20px));
-    max-width: calc(100% - 2px);
-    max-height: calc(100% - 2px);
-    padding: 0 1px;
-  }
-
-  .letter-cell {
-    font-size: clamp(1rem, 5.8vw, 2.1rem);
-    font-weight: normal;
+  .definition-number {
+    top: 1px;
+    left: 2px;
+    font-size: 0.68em;
   }
 }
 
