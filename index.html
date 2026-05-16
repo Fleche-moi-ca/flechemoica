@@ -30,7 +30,6 @@
 
       <header class="xp-header">
         <h1>Flèche-moi ça 🧩</h1>
-        <p>Des mots fléchés en ligne, avec chrono et scores.</p>
       </header>
 
       <main class="container">
@@ -38,12 +37,15 @@
           <h2>Bienvenue sur le site</h2>
 
           <p>
-            Le jeu arrive bientôt. Ici, tu pourras résoudre des grilles,
-            comparer tes temps et tenter de battre les meilleurs scores.
+            Ça arrive bientôt ! En attendant, tu peux envoyer un Wizz.
           </p>
 
-          <button class="xp-button" onclick="alert('La première grille arrive bientôt 😄')">
-            Jouer
+          <p class="wizz-counter">
+            Wizz envoyés : <span id="wizz-count">0</span>
+          </p>
+
+          <button class="xp-button wizz-button" id="wizz-button" type="button">
+            ≋ 😄 ≋
           </button>
         </section>
       </main>
@@ -58,5 +60,27 @@
 
     </div>
   </div>
+  <script>
+    const wizzButton = document.getElementById('wizz-button');
+    const wizzCount = document.getElementById('wizz-count');
+    const storageKey = 'flechemoica-wizz-count';
+
+    let count = Number(localStorage.getItem(storageKey) || 0);
+    wizzCount.textContent = count;
+
+    wizzButton.addEventListener('click', () => {
+      count += 1;
+      localStorage.setItem(storageKey, count);
+      wizzCount.textContent = count;
+
+      document.body.classList.remove('wizzing');
+      void document.body.offsetWidth;
+      document.body.classList.add('wizzing');
+
+      setTimeout(() => {
+        document.body.classList.remove('wizzing');
+      }, 600);
+    });
+  </script>
 </body>
 </html>
