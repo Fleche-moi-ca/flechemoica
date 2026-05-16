@@ -60,18 +60,60 @@
 
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL = 'https://tkgvmiykmoflzufjluwt.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_H0i2NDlNl110RYm2uoGcOQ_SB1XMd0J';
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let wizzRowId = null;
     const wizzButton = document.getElementById('wizz-button');
     const wizzCount = document.getElementById('wizz-count');
-    const storageKey = 'flechemoica-wizz-count';
 
-    let count = Number(localStorage.getItem(storageKey) || 0);
-    wizzCount.textContent = count;
+    async function loadCount() {
+      const { data, error } = await client
+        .from('wizz')
+        .select('id, count')
+        .limit(1)
+        .single();
 
-    wizzButton.addEventListener('click', () => {
-      count += 1;
-      localStorage.setItem(storageKey, count);
-      wizzCount.textContent = count;
+      if (error) {
+        console.error('Erreur chargement Wizz :', error);
+        return;
+      }
+
+      if (data) {
+        wizzRowId = data.id;
+        wizzCount.textContent = data.count;
+      }
+    }
+
+    async function incrementCount() {
+      if (wizzRowId === null) {
+        await loadCount();
+      }
+
+      const current = Number(wizzCount.textContent || 0);
+      const newCount = current + 1;
+
+      wizzCount.textContent = newCount;
+
+      const { error } = await client
+        .from('wizz')
+        .update({ count: newCount })
+        .eq('id', wizzRowId);
+
+      if (error) {
+        console.error('Erreur mise à jour Wizz :', error);
+        wizzCount.textContent = current;
+      }
+    }
+
+    loadCount();
+
+    wizzButton.addEventListener('click', async () => {
+      await incrementCount();
 
       document.body.classList.remove('wizzing');
       void document.body.offsetWidth;
