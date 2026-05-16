@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flèche-moi ça - Essayer — </title>
+  <title>Flèche-moi ça - Essayer</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="Images/favicon.png">
 </head>
@@ -38,12 +38,30 @@
       <main class="grid-page">
         <section class="crossword-wrap" aria-label="Grille de mots fléchés">
           <div class="game-start-panel card" id="game-start-panel">
-            <h2>Essaie une de nos grilles ✨</h2>
-            <p>Clique sur Jouer pour lancer la partie.</p>
-            <button type="button" class="xp-button" id="play-button">Jouer</button>
+            <h2>Accès privé 🔐</h2>
+            <form class="access-form" id="access-form">
+              <input
+                type="password"
+                class="newsletter-input"
+                id="access-code"
+                placeholder="Code d’accès"
+                autocomplete="off"
+                required
+              >
+              <button type="submit" class="xp-button" id="access-button">Valider</button>
+            </form>
+            <p class="access-error" id="access-error" hidden></p>
+            <button type="button" class="xp-button" id="play-button" hidden>Jouer</button>
           </div>
 
           <div class="game-timer" id="game-timer">00:00</div>
+
+          <div class="finish-button-wrap">
+            <button type="button" class="xp-button finish-button" id="finish-button" hidden>
+              Terminer
+            </button>
+          </div>
+
           <div class="crossword-grid game-blurred" id="crossword-grid"></div>
         </section>
       </main>
@@ -51,9 +69,6 @@
       <footer class="site-footer">
         <span>© 2026 Flèche-moi ça</span>
 
-        <button type="button" class="xp-button finish-button" id="finish-button">
-          Terminer
-        </button>
 
         <a href="/mentions-legales.html">Mentions légales</a>
       </footer>
@@ -63,6 +78,10 @@
 
   <script>
     const JSON_FILE = 'grille1.json';
+    const SUPABASE_URL = 'https://tkgvmiykmoflzufjluwt.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrZ3ZtaXlrbW9mbHp1ZmpsdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5Mjc0NjQsImV4cCI6MjA5NDUwMzQ2NH0.alIij_j4mlih9dUY5dtqNRBLk7p6Q-Jkto2Sra9V6MQ';
+    const NEWSLETTER_TABLE = 'newsletter_emails';
+    const ACCESS_RPC = 'check_access_code';
 
     let timerInterval = null;
     let timerStartTime = null;
@@ -83,6 +102,50 @@
       timerInterval = setInterval(() => {
         timer.textContent = formatElapsedTime(Date.now() - timerStartTime);
       }, 250);
+    }
+
+    window.checkAccessCode = async function(code) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${ACCESS_RPC}`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          access_code: code
+        })
+      });
+
+      const resultText = await response.text();
+
+      if (!response.ok) {
+        console.error('Erreur Supabase check_access_code:', response.status, resultText);
+        throw new Error(`Erreur Supabase ${response.status}`);
+      }
+
+      return resultText === 'true';
+    };
+
+    async function saveNewsletterEmail(email, solvedIn) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${NEWSLETTER_TABLE}`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({
+          email,
+          solved_in: solvedIn,
+          page: window.location.pathname
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Impossible d’enregistrer cette adresse mail.');
+      }
     }
 
     function parseWord(word) {
@@ -417,6 +480,10 @@
         `;
       }
       const startPanel = document.getElementById('game-start-panel');
+      const accessForm = document.getElementById('access-form');
+      const accessCodeInput = document.getElementById('access-code');
+      const accessButton = document.getElementById('access-button');
+      const accessError = document.getElementById('access-error');
       const playButton = document.getElementById('play-button');
       const finishButton = document.getElementById('finish-button');
       const grid = document.getElementById('crossword-grid');
@@ -425,10 +492,47 @@
       grid.classList.add('game-blurred');
       timer.classList.add('game-not-started');
 
+      accessForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const code = accessCodeInput.value.trim();
+
+        if (!code) {
+          accessCodeInput.reportValidity();
+          return;
+        }
+
+        accessButton.disabled = true;
+        accessButton.textContent = 'Vérification...';
+        accessError.hidden = true;
+        accessError.textContent = '';
+
+        try {
+          const isAllowed = await window.checkAccessCode(code);
+
+          if (!isAllowed) {
+            throw new Error('Code incorrect.');
+          }
+
+          accessForm.remove();
+          accessError.remove();
+          playButton.hidden = false;
+          startPanel.querySelector('h2').textContent = 'Essaie une de nos grilles ✨';
+          startPanel.querySelector('p').textContent = 'Clique sur Jouer pour lancer la partie.';
+        } catch (error) {
+          console.error(error);
+          accessButton.disabled = false;
+          accessButton.textContent = 'Valider';
+          accessError.hidden = false;
+          accessError.textContent = `${error.message} — vérifie que la fonction check_access_code existe dans Supabase.`;
+        }
+      });
+
       playButton.addEventListener('click', () => {
         startPanel.classList.add('game-start-hidden');
         grid.classList.remove('game-blurred');
         timer.classList.remove('game-not-started');
+        finishButton.hidden = false;
         startTimer();
       });
 
@@ -481,18 +585,48 @@
 
         const newsletterForm = document.getElementById('newsletter-form');
 
-        newsletterForm.addEventListener('submit', (event) => {
+        newsletterForm.addEventListener('submit', async (event) => {
           event.preventDefault();
+
           const emailInput = document.getElementById('newsletter-email');
           const newsletterText = document.getElementById('newsletter-text');
+          const submitButton = newsletterForm.querySelector('button[type="submit"]');
+          const email = emailInput.value.trim().toLowerCase();
 
-          if (newsletterText) {
-            newsletterText.remove();
+          if (!emailInput.checkValidity()) {
+            emailInput.reportValidity();
+            return;
           }
-          newsletterForm.innerHTML = `
-            <p>Merci et à bientôt !</p>
-            <p><strong>${emailInput.value}</strong></p>
-          `;
+
+          submitButton.disabled = true;
+          submitButton.textContent = 'Inscription...';
+
+          try {
+            await saveNewsletterEmail(email, finalTime);
+
+            if (newsletterText) {
+              newsletterText.remove();
+            }
+
+            newsletterForm.innerHTML = `
+              <p>Merci et à bientôt !</p>
+            `;
+          } catch (error) {
+            console.error(error);
+            submitButton.disabled = false;
+            submitButton.textContent = "S'inscrire";
+
+            let errorText = document.getElementById('newsletter-error');
+
+            if (!errorText) {
+              errorText = document.createElement('p');
+              errorText.id = 'newsletter-error';
+              errorText.className = 'newsletter-error';
+              newsletterForm.appendChild(errorText);
+            }
+
+            errorText.textContent = 'Oups, impossible d’enregistrer ton adresse pour le moment.';
+          }
         });
       });
     }
