@@ -153,7 +153,7 @@ body {
 
 .xp-header h1 {
   margin: 0;
-  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-size: 3.2rem;
   color: #123d8f;
   letter-spacing: -0.04em;
   text-shadow: 2px 2px 0 #fff;
@@ -270,12 +270,12 @@ body {
 .crossword-wrap,
 .crossword-wrapper {
   height: min(calc(100svh - 170px), calc(100vw - 64px));
-  width: min(calc(100svh - 170px), calc(100vw - 64px));
+  width: min(calc(100svh - 170px), calc(100vw - 32px));
   max-height: 100%;
-  max-width: calc(100% - 32px);
+  max-width: calc(100% - 16px);
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
-  padding: 0 16px;
+  padding: 0 8px;
   background: transparent;
   border: none;
   overflow: hidden;
@@ -568,7 +568,7 @@ body {
   }
 
   .xp-header h1 {
-    font-size: clamp(1.45rem, 7.2vw, 2.2rem);
+    font-size: 3.2rem;
     max-width: 100%;
     overflow: hidden;
     white-space: nowrap;
