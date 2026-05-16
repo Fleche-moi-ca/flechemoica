@@ -441,7 +441,7 @@ body {
 }
 
 .definition-cell:has(.definition-item.definition-selected) .definition-item + .definition-item {
-  border-top-color: #fff;
+  border-top-color: #111;
 }
 
 .definition-number {
@@ -460,12 +460,18 @@ body {
   color: #fff !important;
 }
 
-.definition-cell:has(.definition-item.definition-selected) {
-  background: #0b4fb3 !important;
-}
 
 .definition-item.definition-selected .definition-text {
   color: #fff !important;
+}
+
+.definition-item:not(.definition-selected) {
+  background: transparent !important;
+  color: #111 !important;
+}
+
+.definition-item:not(.definition-selected) .definition-text {
+  color: #111 !important;
 }
 
 .definition-text {
