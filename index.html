@@ -34,9 +34,9 @@
       <div class="xp-menu-bar">
         <a href="/" class="menu-link">Accueil</a>
         <a href="/grilletest.html" class="menu-link">Essayer</a>
-        <a href="mailto:contact@flechemoica.fr" class="menu-contact" aria-label="Envoyer un mail">✉@</a>
-        <a href="https://www.instagram.com/" class="menu-contact" target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
-        <a href="https://www.tiktok.com/" class="menu-contact" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+        <a href="https://www.instagram.com/flechemoica/" class="menu-contact" target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
+        <a href="https://www.tiktok.com/@flechemoica" class="menu-contact" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+        <a href="mailto:contact@flechemoica.fr" class="menu-contact" aria-label="Envoyer un mail">Contact</a>
       </div>
 
       <header class="xp-header">
@@ -134,4 +134,19 @@
     });
   </script>
 </body>
+<script>
+  document.querySelector('a[aria-label="Instagram"]')?.addEventListener('click', (e) => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      e.preventDefault();
+
+      window.location.href = 'instagram://user?username=flechemoica';
+
+      setTimeout(() => {
+        window.open('https://www.instagram.com/flechemoica/', '_blank');
+      }, 500);
+    }
+  });
+</script>
 </html>

@@ -144,9 +144,20 @@ body {
   text-decoration: underline;
 }
 
-.xp-menu-bar a:last-child,
+.xp-menu-bar a:last-child {
+  margin-left: 0;
+}
+
 .menu-contact {
+  margin-left: 0;
+}
+
+.xp-menu-bar a[aria-label="Instagram"] {
   margin-left: auto;
+}
+
+.xp-menu-bar a[href^="mailto:"] {
+  margin-left: 0;
 }
 
 .xp-header {
